@@ -35,12 +35,14 @@ jobs:
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         
-        # Add SSH key with proper formatting
-        echo "$EC2_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key.pem
+        # Write SSH key properly (handle line endings)
+        printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key.pem
         chmod 600 ~/.ssh/deploy_key.pem
         
-        # Verify key format
-        head -n 1 ~/.ssh/deploy_key.pem
+        # Verify key was written
+        echo "Key file size: $(wc -c < ~/.ssh/deploy_key.pem) bytes"
+        echo "First line: $(head -n 1 ~/.ssh/deploy_key.pem)"
+        echo "Last line: $(tail -n 1 ~/.ssh/deploy_key.pem)"
         
         # Add EC2 to known hosts
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts 2>/dev/null
