@@ -1,41 +1,38 @@
 package com.fashionretail.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-@Entity
-@Table(name = "products")
+@DynamoDbBean
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    private String id;
     private String name;
-
-    @Column(length = 1000)
     private String description;
-
-    @Column(nullable = false)
     private BigDecimal price;
-
     private String imageUrl;
-
     private String category;
-
-    @Column(nullable = false)
     private Integer stockQuantity;
-
     private Double rating;
-
-    @Column(nullable = false)
     private Boolean active = true;
+
+    @DynamoDbPartitionKey
+    public String getId() {
+        return id;
+    }
+
+    public void onCreate() {
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+    }
 }

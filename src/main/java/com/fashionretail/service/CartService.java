@@ -2,56 +2,53 @@ package com.fashionretail.service;
 
 import com.fashionretail.model.CartItem;
 import com.fashionretail.model.Product;
-import com.fashionretail.model.User;
 import com.fashionretail.repository.CartItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
 
-    public List<CartItem> getCartItems(User user) {
-        return cartItemRepository.findByUser(user);
+    public List<CartItem> getCartItems(String userId) {
+        return cartItemRepository.findByUserId(userId);
     }
 
-    public CartItem addToCart(User user, Long productId, Integer quantity) {
+    public CartItem addToCart(String userId, String productId, Integer quantity) {
         Product product = productService.getProductById(productId);
         
-        return cartItemRepository.findByUserAndProductId(user, productId)
+        return cartItemRepository.findByUserIdAndProductId(userId, productId)
                 .map(existingItem -> {
                     existingItem.setQuantity(existingItem.getQuantity() + quantity);
                     return cartItemRepository.save(existingItem);
                 })
                 .orElseGet(() -> {
                     CartItem newItem = new CartItem();
-                    newItem.setUser(user);
-                    newItem.setProduct(product);
+                    newItem.setUserId(userId);
+                    newItem.setProductId(productId);
                     newItem.setQuantity(quantity);
                     newItem.setPrice(product.getPrice());
                     return cartItemRepository.save(newItem);
                 });
     }
 
-    public CartItem updateCartItem(Long cartItemId, Integer quantity) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+    public CartItem updateCartItem(String userId, String productId, Integer quantity) {
+        CartItem cartItem = cartItemRepository.findByUserIdAndProductId(userId, productId)
                 .orElseThrow(() -> new RuntimeException("Cart item not found"));
         cartItem.setQuantity(quantity);
         return cartItemRepository.save(cartItem);
     }
 
-    public void removeFromCart(Long cartItemId) {
-        cartItemRepository.deleteById(cartItemId);
+    public void removeFromCart(String userId, String productId) {
+        cartItemRepository.deleteByUserIdAndProductId(userId, productId);
     }
 
-    public void clearCart(User user) {
-        cartItemRepository.deleteByUser(user);
+    public void clearCart(String userId) {
+        cartItemRepository.deleteByUserId(userId);
     }
 }

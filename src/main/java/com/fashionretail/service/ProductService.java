@@ -4,13 +4,11 @@ import com.fashionretail.model.Product;
 import com.fashionretail.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -19,7 +17,7 @@ public class ProductService {
         return productRepository.findByActiveTrue();
     }
 
-    public Product getProductById(Long id) {
+    public Product getProductById(String id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
     }
@@ -36,7 +34,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, Product productDetails) {
+    public Product updateProduct(String id, Product productDetails) {
         Product product = getProductById(id);
         product.setName(productDetails.getName());
         product.setDescription(productDetails.getDescription());
@@ -48,7 +46,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public void deleteProduct(Long id) {
+    public void deleteProduct(String id) {
         Product product = getProductById(id);
         product.setActive(false);
         productRepository.save(product);

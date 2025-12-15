@@ -25,11 +25,11 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<Order>> getUserOrders(Authentication authentication) {
         User user = userService.getUserByEmail(authentication.getName());
-        return ResponseEntity.ok(orderService.getUserOrders(user));
+        return ResponseEntity.ok(orderService.getUserOrders(user.getId()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<Order> getOrderById(@PathVariable String id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
@@ -37,12 +37,12 @@ public class OrderController {
     public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest request,
                                               Authentication authentication) {
         User user = userService.getUserByEmail(authentication.getName());
-        Order order = orderService.createOrder(user, request.getShippingAddress());
+        Order order = orderService.createOrder(user.getId(), request.getShippingAddress());
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id,
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable String id,
                                                     @RequestParam Order.OrderStatus status) {
         return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
     }

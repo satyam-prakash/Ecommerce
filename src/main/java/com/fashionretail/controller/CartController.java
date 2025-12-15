@@ -24,33 +24,37 @@ public class CartController {
     @GetMapping
     public ResponseEntity<List<CartItem>> getCartItems(Authentication authentication) {
         User user = userService.getUserByEmail(authentication.getName());
-        return ResponseEntity.ok(cartService.getCartItems(user));
+        return ResponseEntity.ok(cartService.getCartItems(user.getId()));
     }
 
     @PostMapping
     public ResponseEntity<CartItem> addToCart(@RequestBody AddToCartRequest request,
                                                Authentication authentication) {
         User user = userService.getUserByEmail(authentication.getName());
-        CartItem cartItem = cartService.addToCart(user, request.getProductId(), request.getQuantity());
+        CartItem cartItem = cartService.addToCart(user.getId(), request.getProductId(), request.getQuantity());
         return ResponseEntity.ok(cartItem);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CartItem> updateCartItem(@PathVariable Long id,
-                                                    @RequestParam Integer quantity) {
-        return ResponseEntity.ok(cartService.updateCartItem(id, quantity));
+    @PutMapping("/{productId}")
+    public ResponseEntity<CartItem> updateCartItem(@PathVariable String productId,
+                                                    @RequestParam Integer quantity,
+                                                    Authentication authentication) {
+        User user = userService.getUserByEmail(authentication.getName());
+        return ResponseEntity.ok(cartService.updateCartItem(user.getId(), productId, quantity));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeFromCart(@PathVariable Long id) {
-        cartService.removeFromCart(id);
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> removeFromCart(@PathVariable String productId,
+                                                Authentication authentication) {
+        User user = userService.getUserByEmail(authentication.getName());
+        cartService.removeFromCart(user.getId(), productId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
     public ResponseEntity<Void> clearCart(Authentication authentication) {
         User user = userService.getUserByEmail(authentication.getName());
-        cartService.clearCart(user);
+        cartService.clearCart(user.getId());
         return ResponseEntity.noContent().build();
     }
 }
