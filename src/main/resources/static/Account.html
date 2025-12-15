@@ -136,7 +136,72 @@
                Indicator.style.transform = "translateX(0px)";
            }
        
+       </script>
        
+       <!--------- js for Authentication-------->
+       <script>
+           // Handle Registration
+           document.getElementById('RegForm').addEventListener('submit', async function(e) {
+               e.preventDefault();
+               
+               const name = document.querySelector('#RegForm input[placeholder="Username"]').value;
+               const email = document.querySelector('#RegForm input[placeholder="Email"]').value;
+               const password = document.querySelector('#RegForm input[placeholder="Password"]').value;
+               
+               try {
+                   const response = await fetch('/api/auth/register', {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ name, email, password })
+                   });
+                   
+                   const data = await response.json();
+                   
+                   if (response.ok) {
+                       alert('Registration successful! Please login.');
+                       login(); // Switch to login form
+                       document.getElementById('RegForm').reset();
+                   } else {
+                       alert('Registration failed: ' + (data.message || 'Unknown error'));
+                   }
+               } catch (error) {
+                   alert('Error: ' + error.message);
+               }
+           });
+           
+           // Handle Login
+           document.getElementById('LoginForm').addEventListener('submit', async function(e) {
+               e.preventDefault();
+               
+               const email = document.querySelector('#LoginForm input[placeholder="Username"]').value;
+               const password = document.querySelector('#LoginForm input[placeholder="Password"]').value;
+               
+               try {
+                   const response = await fetch('/api/auth/login', {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       },
+                       body: JSON.stringify({ email, password })
+                   });
+                   
+                   const data = await response.json();
+                   
+                   if (response.ok) {
+                       // Store JWT token
+                       localStorage.setItem('token', data.token);
+                       localStorage.setItem('userEmail', email);
+                       alert('Login successful!');
+                       window.location.href = 'index.html';
+                   } else {
+                       alert('Login failed: ' + (data.message || 'Invalid credentials'));
+                   }
+               } catch (error) {
+                   alert('Error: ' + error.message);
+               }
+           });
        </script>
        
        
