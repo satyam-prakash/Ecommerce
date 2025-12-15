@@ -33,13 +33,17 @@ jobs:
       run: |
         # Create SSH directory
         mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
         
-        # Add SSH key
-        echo "$EC2_SSH_KEY" > ~/.ssh/deploy_key.pem
+        # Add SSH key with proper formatting
+        echo "$EC2_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key.pem
         chmod 600 ~/.ssh/deploy_key.pem
         
+        # Verify key format
+        head -n 1 ~/.ssh/deploy_key.pem
+        
         # Add EC2 to known hosts
-        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts 2>/dev/null
         
         # Stop the service
         ssh -i ~/.ssh/deploy_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \
