@@ -31,18 +31,28 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
       run: |
+        # Verify secrets are set
+        if [ -z "$EC2_HOST" ]; then echo "ERROR: EC2_HOST secret not set"; exit 1; fi
+        if [ -z "$EC2_USER" ]; then echo "ERROR: EC2_USER secret not set"; exit 1; fi
+        if [ -z "$EC2_SSH_KEY" ]; then echo "ERROR: EC2_SSH_KEY secret not set"; exit 1; fi
+        
+        echo "✓ All secrets are configured"
+        echo "EC2_HOST: $EC2_HOST"
+        echo "EC2_USER: $EC2_USER"
+        echo "EC2_SSH_KEY length: ${#EC2_SSH_KEY} characters"
+        
         # Create SSH directory
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         
-        # Write SSH key properly (handle line endings)
-        printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key.pem
+        # Write SSH key
+        echo "$EC2_SSH_KEY" > ~/.ssh/deploy_key.pem
         chmod 600 ~/.ssh/deploy_key.pem
         
-        # Verify key was written
+        # Verify key format
         echo "Key file size: $(wc -c < ~/.ssh/deploy_key.pem) bytes"
-        echo "First line: $(head -n 1 ~/.ssh/deploy_key.pem)"
-        echo "Last line: $(tail -n 1 ~/.ssh/deploy_key.pem)"
+        head -n 1 ~/.ssh/deploy_key.pem
+        tail -n 1 ~/.ssh/deploy_key.pem
         
         # Add EC2 to known hosts
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts 2>/dev/null
