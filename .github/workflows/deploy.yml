@@ -45,11 +45,8 @@ jobs:
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         
-        # Write SSH key using cat (preserves all formatting)
-        cat > ~/.ssh/deploy_key.pem << 'EOFKEY'
-${{ secrets.EC2_SSH_KEY }}
-EOFKEY
-        
+        # Write SSH key (preserves all newlines and formatting)
+        printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key.pem
         chmod 600 ~/.ssh/deploy_key.pem
         
         # Verify key format
