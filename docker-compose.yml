@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  fashion-retail-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST}
+      - SUPABASE_DB_NAME=${SUPABASE_DB_NAME}
+      - SUPABASE_DB_USER=${SUPABASE_DB_USER}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+    restart: unless-stopped
+    networks:
+      - fashion-retail-network
+
+networks:
+  fashion-retail-network:
+    driver: bridge
