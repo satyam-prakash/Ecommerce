@@ -32,9 +32,9 @@ jobs:
         EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
       run: |
         # Verify secrets are set
-        if [ -z "$EC2_HOST" ]; then echo "ERROR: EC2_HOST secret not set"; exit 1; fi
-        if [ -z "$EC2_USER" ]; then echo "ERROR: EC2_USER secret not set"; exit 1; fi
-        if [ -z "$EC2_SSH_KEY" ]; then echo "ERROR: EC2_SSH_KEY secret not set"; exit 1; fi
+        if [ -z "$EC2_HOST" ]; then echo "❌ ERROR: EC2_HOST secret not set"; exit 1; fi
+        if [ -z "$EC2_USER" ]; then echo "❌ ERROR: EC2_USER secret not set"; exit 1; fi
+        if [ -z "$EC2_SSH_KEY" ]; then echo "❌ ERROR: EC2_SSH_KEY secret not set or empty"; exit 1; fi
         
         echo "✓ All secrets are configured"
         echo "EC2_HOST: $EC2_HOST"
@@ -45,14 +45,23 @@ jobs:
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         
-        # Write SSH key
-        echo "$EC2_SSH_KEY" > ~/.ssh/deploy_key.pem
+        # Write SSH key using cat (preserves all formatting)
+        cat > ~/.ssh/deploy_key.pem << 'EOFKEY'
+${{ secrets.EC2_SSH_KEY }}
+EOFKEY
+        
         chmod 600 ~/.ssh/deploy_key.pem
         
         # Verify key format
         echo "Key file size: $(wc -c < ~/.ssh/deploy_key.pem) bytes"
-        head -n 1 ~/.ssh/deploy_key.pem
-        tail -n 1 ~/.ssh/deploy_key.pem
+        echo "First line: $(head -n 1 ~/.ssh/deploy_key.pem)"
+        echo "Last line: $(tail -n 1 ~/.ssh/deploy_key.pem)"
+        
+        # Validate key format
+        if ! head -n 1 ~/.ssh/deploy_key.pem | grep -q "BEGIN.*PRIVATE KEY"; then
+          echo "❌ ERROR: Invalid key format - must start with BEGIN PRIVATE KEY"
+          exit 1
+        fi
         
         # Add EC2 to known hosts
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts 2>/dev/null
